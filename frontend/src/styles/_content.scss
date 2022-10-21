@@ -1,0 +1,102 @@
+@import "./varaibles";
+
+.content {
+    &__main {
+        width: 80%;
+        margin: 30px auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+
+        div {
+            font-size: $fs-main;
+            line-height: $ln-main;
+        }
+
+        p {
+            margin-bottom: 10px;
+            line-height: $ln-main;
+        }
+    }
+    &__create {
+        margin-bottom: 15px;
+    }
+
+    &__pagination {
+        padding: 20px 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    &__worker {
+        width: 80%;
+        margin: 30px auto;
+
+        &-delete {
+            color: red;
+        }
+    }
+
+    &__tasks {
+        width: 80%;
+        margin: 30px auto;
+
+        .ant-list-item {
+            display: block;
+        }
+    }
+
+    &__task {
+        &-description {
+            font-size: $fs-main;
+        }
+
+        &-complete {
+            text-decoration: line-through;
+        }
+        &-title {
+            font-size: $fs-main;
+        }
+
+        &-status {
+            margin: 0;
+
+            &.active {
+                color: orange;
+            }
+            &.completed {
+                color: green;
+            }
+            &.closed {
+                color: grey;
+            }
+        }
+    }
+
+    &__panel {
+        &.remove {
+            opacity: 0;
+            text-decoration: line-through;
+            transition: opacity 1s;
+        }
+    }
+}
+
+.ant-list-split .ant-list-item {
+    border-bottom: 2px solid #fff;
+}
+
+.ant-list-item-meta-description {
+    color: black;
+}
+
+.ant-list-item-meta-title > a {
+    color: black;
+    font-size: 18px;
+    font-weight: 700;
+}
+.ant-list-item-action li {
+    margin: 0;
+    padding: 0;
+}

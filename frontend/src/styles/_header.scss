@@ -1,0 +1,12 @@
+@import "./varaibles";
+
+.header {
+    background-color: #120338;
+    font-weight: 700;
+    font-size: 22px !important;
+
+    ul {
+        font-size: $fs-main;
+        line-height: $ln-main;
+    }
+}
