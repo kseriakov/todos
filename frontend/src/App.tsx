@@ -8,6 +8,7 @@ import React from "react";
 import Navbar from "./components/Navbar";
 import AppRoutes from "./components/AppRoutes";
 import { BrowserRouter } from "react-router-dom";
+import AppFooter from "./components/AppFooter";
 
 const App: React.FC = () => {
     return (
@@ -18,7 +19,7 @@ const App: React.FC = () => {
                     <Content className="content">
                         <AppRoutes />
                     </Content>
-                    <Footer className="footer">Footer</Footer>
+                    <AppFooter />
                 </Layout>
             </div>
         </BrowserRouter>

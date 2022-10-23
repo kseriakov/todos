@@ -1,36 +1,45 @@
-import { Collapse } from "antd";
-import { useState } from "react";
-import useInput from "../hooks/useInput";
+import { Button, Collapse, Row } from "antd";
+import { useMemo, useState } from "react";
 
-import { useArray } from "../hooks/useArray";
 import { ITask } from "../models/task";
-import { taskData } from "../pages/Tasks";
-import ModalTask from "./ModalTask";
 import TaskButtons from "./TaskButtons";
+import ModalTaskForm from "./ModalTaskForm";
 
 const { Panel } = Collapse;
 
-const TaskList: React.FC = () => {
-    const {
-        data: tasks,
-        actionData: changeTask,
-        deleteData: deleteTask,
-    } = useArray(taskData);
+interface TaskListProps {
+    currentTask: ITask;
+    setCurrentTask: (task: ITask) => void;
+    tasks: ITask[];
+    changeTask: (task: ITask) => void;
+    deleteTask: (task: ITask) => void;
+}
 
+const TaskList: React.FC<TaskListProps> = ({
+    currentTask,
+    setCurrentTask,
+    tasks,
+    changeTask,
+    deleteTask,
+}) => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-
-    const [currentTask, setCurrentTask] = useState<ITask>({} as ITask);
+    const [loading, setLoading] = useState<boolean>(false);
 
     const hideTask = (task: ITask) => {
         setTimeout(() => deleteTask(task), 700);
         return "remove";
     };
 
+    const onLoad = () => {
+        setLoading(true);
+        setTimeout(() => setLoading(false), 500);
+    };
+
     return (
         <>
-            <ModalTask
-                currentTask={currentTask}
-                actionTask={changeTask}
+            <ModalTaskForm
+                currentItem={currentTask}
+                actionItem={changeTask}
                 isModalOpen={isModalOpen}
                 setIsModalOpen={setIsModalOpen}
             />
@@ -59,6 +68,11 @@ const TaskList: React.FC = () => {
                     </Panel>
                 ))}
             </Collapse>
+            <Row className="content__load" justify="center">
+                <Button loading={loading} onClick={() => onLoad()}>
+                    Загрузить еще
+                </Button>
+            </Row>
         </>
     );
 };

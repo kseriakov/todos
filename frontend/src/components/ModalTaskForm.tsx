@@ -1,122 +1,97 @@
-import { Form, Select, Button, DatePicker } from "antd";
+import { Form, Select, Button, DatePicker, Modal } from "antd";
 import TextArea from "antd/lib/input/TextArea";
 import moment from "moment";
-import { useEffect, useState } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
 
-import { ITask } from "../models/task";
-import dateToString from "../utils/dateToString";
 import { required } from "../utils/formFields";
-import { taskDateToMoment } from "../utils/taskDateToMoment";
+import { dateToMoment } from "../utils/dateToMoment";
+import { ITask } from "../models/task";
+import { useForm } from "antd/es/form/Form";
+import { TaskDataForm, updateTask } from "../utils/updateTask";
 
 interface ModalTaskFormProps {
-    submitRef: any;
-    currentTask: ITask;
-    actionTask: (task: ITask) => void;
-    setIsModalOpen: (isModalOpen: boolean) => void;
-}
-
-export interface TaskForModalForm extends Omit<ITask, "date"> {
-    date: moment.Moment;
+    isModalOpen: boolean;
+    setIsModalOpen: (isOpen: boolean) => void;
+    currentItem: ITask;
+    actionItem: (item: ITask) => void;
 }
 
 const ModalTaskForm: React.FC<ModalTaskFormProps> = ({
-    submitRef,
-    currentTask,
-    actionTask,
+    isModalOpen,
     setIsModalOpen,
+    currentItem,
+    actionItem,
 }) => {
-    const [form] = Form.useForm();
-
-    const [formData, setFormData] = useState<TaskForModalForm>(
-        taskDateToMoment(currentTask)
-    );
+    const submitRef = useRef(null) as RefObject<HTMLButtonElement> | null;
+    const [form] = useForm();
 
     useEffect(() => {
-        setFormData(() => taskDateToMoment(currentTask));
-    }, [currentTask]);
+        const dateMoment = dateToMoment(currentItem.date);
+        const datePicker = dateMoment.isValid() ? dateMoment : null;
 
-    useEffect(() => {
-        for (let prop in formData) {
-            if (prop === "date") {
-                form.setFieldValue(
-                    prop,
-                    formData.date?.isValid() ? formData[prop] : ""
-                );
-                continue;
-            }
+        form.setFieldsValue({ ...currentItem, datePicker });
+    }, [currentItem]);
 
-            form.setFieldValue(prop, formData[prop]);
-        }
-    }, [formData]);
-
-    const onChangeTask = (updatedTask: TaskForModalForm) => {
-        actionTask({
-            ...updatedTask,
-            date: dateToString(updatedTask.date.toDate()),
-        } as ITask);
+    const onChangeTask = (data: TaskDataForm) => {
+        actionItem(updateTask(currentItem, data));
         setIsModalOpen(false);
     };
 
     return (
-        <Form form={form} onFinish={() => onChangeTask(formData)}>
-            <Form.Item
-                name="date"
-                label="Срок исполнения"
-                rules={[required("Заполните поле")]}
+        <div className="content__modal">
+            <Modal
+                title="Поручение"
+                open={isModalOpen}
+                onCancel={() => setIsModalOpen(false)}
+                cancelText="Закрыть"
+                okText="Применить"
+                onOk={() => submitRef?.current?.click()}
+                getContainer={false}
             >
-                <DatePicker
-                    placeholder="Выберете дату"
-                    onChange={(e: moment.Moment | null) =>
-                        setFormData((formData) => ({
-                            ...formData,
-                            date: e as moment.Moment,
-                        }))
-                    }
-                />
-            </Form.Item>
-            <Form.Item
-                name="worker"
-                label="Выбрать сотрудника"
-                rules={[required("Заполните поле")]}
-            >
-                <Select
-                    onChange={(e: string) =>
-                        setFormData((formData) => ({
-                            ...formData,
-                            worker: e,
-                        }))
-                    }
-                >
-                    <Select.Option value={"User1"}>User1</Select.Option>
-                    <Select.Option value={"User2"}>User2</Select.Option>
-                    <Select.Option value={"User3"}>User3</Select.Option>
-                    <Select.Option value={"User4"}>User4</Select.Option>
-                </Select>
-            </Form.Item>
+                <Form onFinish={(data) => onChangeTask(data)} form={form}>
+                    <Form.Item
+                        name="datePicker"
+                        label="Срок исполнения"
+                        rules={[required("Заполните поле")]}
+                    >
+                        <DatePicker
+                            format="DD-MM-YYYY"
+                            placeholder="Выберите дату"
+                        />
+                    </Form.Item>
+                    <Form.Item
+                        name="worker"
+                        label="Выбрать сотрудника"
+                        rules={[required("Заполните поле")]}
+                    >
+                        <Select>
+                            <Select.Option value={"User1"}>User1</Select.Option>
+                            <Select.Option value={"User2"}>User2</Select.Option>
+                            <Select.Option value={"User3"}>User3</Select.Option>
+                            <Select.Option value={"User4"}>User4</Select.Option>
+                        </Select>
+                    </Form.Item>
 
-            <Form.Item
-                name="text"
-                label="Поручение"
-                rules={[required("Заполните поле")]}
-            >
-                <TextArea
-                    rows={4}
-                    name="text"
-                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                        setFormData((formData) => ({
-                            ...formData,
-                            text: e.target.value,
-                        }))
-                    }
-                />
-            </Form.Item>
+                    <Form.Item
+                        name="text"
+                        label="Поручение"
+                        rules={[required("Заполните поле")]}
+                    >
+                        <TextArea rows={4} name="text" />
+                    </Form.Item>
 
-            <Form.Item style={{ display: "none" }}>
-                <Button type="primary" htmlType="submit" ref={submitRef}>
-                    Submit
-                </Button>
-            </Form.Item>
-        </Form>
+                    <Form.Item style={{ display: "none" }}>
+                        <Button
+                            type="primary"
+                            htmlType="submit"
+                            ref={submitRef}
+                        >
+                            Submit
+                        </Button>
+                    </Form.Item>
+                </Form>
+            </Modal>
+        </div>
     );
 };
 

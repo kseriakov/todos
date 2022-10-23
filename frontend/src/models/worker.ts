@@ -3,4 +3,6 @@ export interface IWorker {
     firstName: string;
     lastName: string;
     email: string;
+    birthdate: string;
+    position: string
 }

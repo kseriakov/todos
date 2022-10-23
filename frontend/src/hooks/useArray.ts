@@ -1,6 +1,4 @@
 import { useState } from "react";
-import { Type } from "typescript";
-import { ITask } from "../models/task";
 
 interface IData {
     id: number;
@@ -8,8 +6,8 @@ interface IData {
 
 interface ReturnResult<T> {
     data: T[];
-    actionData: (actionItem: T) => void;
-    deleteData: (deleteItem: T) => void;
+    actionData: (item: T) => void;
+    deleteData: (item: T) => void;
 }
 
 export const useArray = <T extends IData>(data: T[]): ReturnResult<T> =>
@@ -18,18 +16,18 @@ export const useArray = <T extends IData>(data: T[]): ReturnResult<T> =>
 const useItemArray = <T extends IData>(taskData: T[]): ReturnResult<T> => {
     const [data, setTasks] = useState<T[]>(taskData);
 
-    const actionData = (task: T) => {
-        if (task.id) {
+    const actionData = (item: T) => {
+        if (item.id) {
             setTasks((tasks) =>
-                tasks.map((t) => (task.id === t.id ? task : t))
+                tasks.map((t) => (item.id === t.id ? item : t))
             );
         } else {
-            setTasks((tasks) => [...tasks, task]);
+            setTasks((tasks) => [...tasks, item]);
         }
     };
 
-    const deleteData = (task: T) => {
-        setTasks((data) => data.filter((t) => t.id !== task.id));
+    const deleteData = (item: T) => {
+        setTasks((data) => data.filter((t) => t.id !== item.id));
     };
 
     return {

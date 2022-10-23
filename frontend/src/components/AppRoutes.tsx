@@ -1,22 +1,21 @@
 import { Route, Routes } from "react-router-dom";
+import { UserRole } from "../enums/navbar";
 import {
-    generalRoutes,
     privateChiefRoutes,
     privateUserRoutes,
     publicRoutes,
 } from "../router/router";
 
+export const role = UserRole.CHIEF;
+
 const AppRoutes: React.FC = () => {
     const isAuth = true;
-    const isCheif = true;
 
-    const routes = (
-        isAuth
-            ? isCheif
-                ? privateChiefRoutes
-                : privateUserRoutes
-            : publicRoutes
-    ).concat(generalRoutes);
+    const routes = isAuth
+        ? role === (UserRole.CHIEF as UserRole)
+            ? privateChiefRoutes
+            : privateUserRoutes
+        : publicRoutes;
 
     return (
         <Routes>

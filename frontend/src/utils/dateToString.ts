@@ -1,4 +1,8 @@
-const dateToString = (date: Date): string => {
+const dateToString = (date: Date | undefined): string => {
+    if (!date) {
+        return "";
+    }
+
     const year = `${date.getFullYear()}`;
     const month =
         date.getMonth() + 1 < 10

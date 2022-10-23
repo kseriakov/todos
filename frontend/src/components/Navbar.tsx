@@ -9,10 +9,10 @@ import {
     UserLinksNavbar,
 } from "../enums/navbar";
 
-import { RouteForNavbar, RoutePath } from "../router/router";
+import { RouteForNavbar } from "../router/router";
+import { role } from "./AppRoutes";
 
 const Navbar: React.FC = () => {
-    const role = UserRole.CHIEF;
     const isAuth = true;
 
     const navigate = useNavigate();
@@ -22,7 +22,7 @@ const Navbar: React.FC = () => {
         : GeneralLinksNavbar.LOGIN;
 
     const links: string[] =
-        role === UserRole.CHIEF
+        role === (UserRole.CHIEF as UserRole)
             ? [
                   CheifLinksNavbar.TASKS_ON_CONTROL,
                   CheifLinksNavbar.MY_WORKES,
@@ -31,7 +31,6 @@ const Navbar: React.FC = () => {
             : [UserLinksNavbar.TASKS, authLink];
 
     const goToLink = (e: MenuInfo) => {
-        console.log(RouteForNavbar.get(e.key));
         navigate(RouteForNavbar.get(e.key) as To);
     };
 

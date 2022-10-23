@@ -8,7 +8,7 @@
         flex-direction: column;
         justify-content: space-around;
 
-        div {
+        .content__panel  {
             font-size: $fs-main;
             line-height: $ln-main;
         }
@@ -80,6 +80,10 @@
             text-decoration: line-through;
             transition: opacity 1s;
         }
+    }
+
+    &__load {
+        margin-top: 15px;
     }
 }
 
