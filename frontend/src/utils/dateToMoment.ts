@@ -1,5 +1,6 @@
 import moment from "moment";
 
-export const dateToMoment = (date: string): moment.Moment => {
-    return moment(date, "DD-MM-YYYY");
+export const dateToMoment = (date: string): moment.Moment | null => {
+    const mom = moment(date, "YYYY-MM-DD");
+    return mom.isValid() ? mom : null
 };

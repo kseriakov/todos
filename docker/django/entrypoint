@@ -1,0 +1,41 @@
+#!/bin/sh
+
+# Скрипт завершает работу, если если любая последующая команда завершается с ненулевым статусом
+set -o errexit
+
+# При любом сбое в работе конвейеров также завершается сценарий bash
+set -o pipefail
+
+# Завершение скрипта при обращении к неопределенной переменной
+set -o nounset
+
+db_ready() {
+python << END
+import sys
+import psycopg2
+try:
+    conn = psycopg2.connect(
+        dbname='${POSTGRES_DB}', 
+        user='${POSTGRES_USER}',
+        password='${POSTGRES_PASSWORD}',
+        host='${POSTGRES_HOST}',
+        port='${POSTGRES_PORT}',
+    )
+except:
+    sys.exit(-1)
+
+sys.exit(0)
+END
+}
+
+echo Start to connection with postgres
+
+until db_ready
+do
+    sleep 1
+    echo "Waiting for connection..."
+done
+
+echo "Connection is done!!!"
+
+exec "$@"

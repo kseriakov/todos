@@ -1,0 +1,97 @@
+version: '3.9'
+services:
+  back:
+    build:
+      context: .
+      dockerfile: ./docker/django/Dockerfile
+    env_file:
+      - ./backend/.env
+    volumes:
+      - .:/var/www/todos
+      - static_volume:/var/www/todos/backend/staticfiles
+      - media_volume:/var/www/todos/backend/mediafiles
+    command: [ "/start" ]
+    depends_on:
+      - db
+    expose:
+      - "8888"
+    networks:
+      - todos
+
+  db:
+    image: postgres:15.0-alpine
+    restart: on-failure
+    env_file:
+      - ./backend/.env
+    volumes:
+      - db_volume:/var/lib/postgresql/data
+    networks:
+      - todos
+
+  nginx:
+    build: ./docker/nginx
+    restart: on-failure
+    ports:
+      - "8000:80"
+    volumes:
+    # Автоматически в контейнере будут созданы папки static и media
+      - static_volume:/var/www/todos/backend/static
+      - media_volume:/var/www/todos/backend/media
+    depends_on:
+      - back
+    networks:
+      - todos
+
+  redis:
+    image: redis:7.0.5-alpine
+    restart: on-failure
+    expose:
+      - "6379"
+    networks:
+      - todos
+
+  celery:
+    build: 
+      context: .
+      dockerfile: ./docker/django/Dockerfile
+    restart: on-failure
+    env_file:
+      - ./backend/.env
+    command: [ "/celery" ]
+    volumes:
+      - .:/var/www/todos
+    depends_on:
+      - redis
+      - db
+    networks:
+      - todos
+
+  flower:
+    build: 
+      context: .
+      dockerfile: ./docker/django/Dockerfile
+    restart: on-failure
+    env_file:
+      - ./backend/.env
+    command: [ "/flower" ]
+    volumes:
+      - .:/var/www/todos
+    depends_on:
+      - celery
+      - redis
+      - db
+    ports:
+      - "8001:5555"
+    networks:
+      - todos    
+
+volumes:
+  static_volume:
+  media_volume:
+  db_volume:
+
+networks:
+  todos:
+    driver: bridge
+
+

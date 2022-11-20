@@ -1,0 +1,23 @@
+#!/bin/sh
+
+set -o errexit
+set -o pipefail
+set -o nounset
+
+worker_ready() {
+    celery --workdir=./backend --app=todos inspect ping
+}
+
+until worker_ready
+    do 
+        >&2 echo "Celery not available"
+        sleep 1
+    done
+
+echo "Celery is available!"
+
+# Запускаем монитор flower
+celery --workdir=./backend --app=todos \
+    flower --app todos --broker="${CELERY_BROKER_URL}" --port=5555
+
+echo "Flower started successfully!"

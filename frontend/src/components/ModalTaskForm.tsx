@@ -1,54 +1,94 @@
 import { Form, Select, Button, DatePicker, Modal } from "antd";
 import TextArea from "antd/lib/input/TextArea";
-import moment from "moment";
-import { RefObject, useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 import { required } from "../utils/formFields";
 import { dateToMoment } from "../utils/dateToMoment";
 import { ITask } from "../models/task";
 import { useForm } from "antd/es/form/Form";
-import { TaskDataForm, updateTask } from "../utils/updateTask";
+import { taskAPI } from "../services/taskAPI";
+import dateToString from "../utils/dateToString";
+import { workerAPI } from "../services/workerAPI";
+import { ITaskFormData } from "../services/types";
+import { IUser } from "../models/user";
 
 interface ModalTaskFormProps {
     isModalOpen: boolean;
     setIsModalOpen: (isOpen: boolean) => void;
-    currentItem: ITask;
-    actionItem: (item: ITask) => void;
+    currentTask: ITask;
+    workerSelected?: IUser | null;
 }
 
 const ModalTaskForm: React.FC<ModalTaskFormProps> = ({
     isModalOpen,
     setIsModalOpen,
-    currentItem,
-    actionItem,
+    currentTask,
+    workerSelected,
 }) => {
-    const submitRef = useRef(null) as RefObject<HTMLButtonElement> | null;
     const [form] = useForm();
+    const submitRef = useRef<HTMLButtonElement | null>(null);
+
+    const { data: workers } = workerAPI.useGetMyWorkersQuery();
+    const [createTask, { isLoading: loadingCreate }] =
+        taskAPI.useCreateTaskMutation();
+    const [changeTask, {}] = taskAPI.useChangeTaskMutation();
 
     useEffect(() => {
-        const dateMoment = dateToMoment(currentItem.date);
-        const datePicker = dateMoment.isValid() ? dateMoment : null;
+        const datePicker = dateToMoment(currentTask.date);
+        form.setFieldsValue({
+            ...currentTask,
+            datePicker,
+        });
 
-        form.setFieldsValue({ ...currentItem, datePicker });
-    }, [currentItem]);
+        if (workerSelected) {
+            form.setFieldValue("workerId", workerSelected.id);
+        }
+    }, [currentTask]);
 
-    const onChangeTask = (data: TaskDataForm) => {
-        actionItem(updateTask(currentItem, data));
+    const onActionTask = async (data: ITaskFormData) => {
+        if (currentTask.id) {
+            await changeTask({
+                id: currentTask.id,
+                text: data.text,
+                date: dateToString(data.datePicker.toDate()),
+                is_completed: false,
+            });
+        } else {
+            await createTask({
+                worker_id: data.workerId,
+                text: data.text,
+                date: dateToString(data.datePicker.toDate()),
+            });
+        }
+
         setIsModalOpen(false);
     };
 
     return (
         <div className="content__modal">
             <Modal
+                forceRender={true}
                 title="Поручение"
                 open={isModalOpen}
                 onCancel={() => setIsModalOpen(false)}
                 cancelText="Закрыть"
                 okText="Применить"
-                onOk={() => submitRef?.current?.click()}
                 getContainer={false}
+                footer={[
+                    <Button key="back" onClick={() => setIsModalOpen(false)}>
+                        Закрыть
+                    </Button>,
+                    <Button
+                        key="submit"
+                        type="primary"
+                        loading={loadingCreate}
+                        onClick={() => submitRef?.current?.click()}
+                    >
+                        Применить
+                    </Button>,
+                ]}
             >
-                <Form onFinish={(data) => onChangeTask(data)} form={form}>
+                <Form onFinish={(data) => onActionTask(data)} form={form}>
                     <Form.Item
                         name="datePicker"
                         label="Срок исполнения"
@@ -60,15 +100,19 @@ const ModalTaskForm: React.FC<ModalTaskFormProps> = ({
                         />
                     </Form.Item>
                     <Form.Item
-                        name="worker"
+                        name="workerId"
                         label="Выбрать сотрудника"
                         rules={[required("Заполните поле")]}
                     >
                         <Select>
-                            <Select.Option value={"User1"}>User1</Select.Option>
-                            <Select.Option value={"User2"}>User2</Select.Option>
-                            <Select.Option value={"User3"}>User3</Select.Option>
-                            <Select.Option value={"User4"}>User4</Select.Option>
+                            {workers?.map((worker) => (
+                                <Select.Option
+                                    value={worker.id}
+                                    key={worker.id}
+                                >
+                                    {worker.firstName} {worker.lastName}
+                                </Select.Option>
+                            ))}
                         </Select>
                     </Form.Item>
 

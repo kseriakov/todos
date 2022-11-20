@@ -9,4 +9,9 @@
         font-size: $fs-main;
         line-height: $ln-main;
     }
+
+    &__username {
+        margin-right: auto;
+        color: rgba(255, 255, 255, 0.65);
+    }
 }

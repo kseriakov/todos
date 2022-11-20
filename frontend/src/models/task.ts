@@ -2,7 +2,7 @@ export interface ITask {
     id: number;
     text: string;
     worker: string;
-    workerId: string;
+    workerId: number;
     date: string;
     isActive: boolean;
     isCompleted: boolean;

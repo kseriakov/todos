@@ -2,39 +2,31 @@ import { List, Button, Skeleton } from "antd";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import { useArray } from "../hooks/useArray";
 import { ITask } from "../models/task";
-import { IWorker } from "../models/worker";
-import { taskData } from "../pages/WorkerTasks";
+import { IUser } from "../models/user";
 import { RoutePath } from "../router/router";
+import { workerAPI } from "../services/workerAPI";
 import ModalTaskForm from "./ModalTaskForm";
 
-interface WorkerListProps {
-    loading: boolean;
-    workers: IWorker[];
-    deleteWorker: (worker: IWorker) => void;
-}
-
-const WorkerList: React.FC<WorkerListProps> = ({
-    loading,
-    workers,
-    deleteWorker,
-}) => {
-    const [isTaskModalOpen, setIsTaskModalOpen] = useState<boolean>(false);
-    const [currentTask, setCurrentTask] = useState<ITask>({} as ITask);
-
-    const { actionData: createTask } = useArray(taskData);
+const WorkerList: React.FC = () => {
+    const { data: workers, isLoading } = workerAPI.useGetMyWorkersQuery();
+    const [deleteWorker, {}] = workerAPI.useDeleteWorkerMutation();
 
     const navigate = useNavigate();
 
-    const onCreateTask = (workerId: number) => {
-        const worker = workers.find((w) => w.id === workerId);
-        if (worker) {
+    const [isTaskModalOpen, setIsTaskModalOpen] = useState<boolean>(false);
+    const [currentTask, setCurrentTask] = useState<ITask>({} as ITask);
+    const [workerSelected, setWorkerSelected] = useState<IUser | null>(null);
+
+    const onCreateTask = (worker: IUser) => {
+        const workerAPI = workers?.find((w) => w.id === worker.id);
+        if (workerAPI) {
             setCurrentTask((currentTask) => ({
                 ...currentTask,
-                worker: worker.firstName,
+                worker: workerAPI.firstName,
             }));
         }
+        setWorkerSelected(worker);
 
         setIsTaskModalOpen(true);
     };
@@ -44,23 +36,31 @@ const WorkerList: React.FC<WorkerListProps> = ({
             <ModalTaskForm
                 isModalOpen={isTaskModalOpen}
                 setIsModalOpen={setIsTaskModalOpen}
-                currentItem={currentTask}
-                actionItem={createTask}
+                currentTask={currentTask}
+                workerSelected={workerSelected}
             />
 
             <List
-                loading={loading}
+                loading={isLoading}
                 itemLayout="horizontal"
-                // loadMore={loadMore}
                 dataSource={workers}
-                renderItem={(item) => (
+                renderItem={(wrk) => (
                     <List.Item
                         actions={[
                             <Button
                                 key="all-taks"
                                 className="content__worker-btn"
                                 onClick={(e) =>
-                                    navigate(`${RoutePath.TASKS}/${item.id}`)
+                                    navigate(
+                                        `${RoutePath.WORKER_TASKS}/${wrk.id}`,
+                                        {
+                                            state: {
+                                                workerFirstName: wrk.firstName,
+                                                workerLastName: wrk.lastName,
+                                                workerPosition: wrk.position,
+                                            },
+                                        }
+                                    )
                                 }
                             >
                                 Все поручения
@@ -68,7 +68,7 @@ const WorkerList: React.FC<WorkerListProps> = ({
                             <Button
                                 key="new-taks"
                                 className="content__worker-btn"
-                                onClick={() => onCreateTask(item.id)}
+                                onClick={() => onCreateTask(wrk)}
                                 style={{ color: "green" }}
                             >
                                 Новое
@@ -76,20 +76,32 @@ const WorkerList: React.FC<WorkerListProps> = ({
                             <Button
                                 className="content__worker-delete content__worker-btn"
                                 key="delete-worker"
-                                onClick={() => deleteWorker(item)}
+                                onClick={() => deleteWorker(wrk.id)}
                             >
                                 Удалить сотрудника
                             </Button>,
                         ]}
                     >
-                        <Skeleton avatar title={false} loading={loading} active>
+                        <Skeleton
+                            avatar
+                            title={false}
+                            loading={isLoading}
+                            active
+                        >
                             <List.Item.Meta
                                 title={
-                                    <Link to={`${RoutePath.TASKS}/${item.id}`}>
-                                        {item.firstName} {item.lastName}
+                                    <Link
+                                        to={`${RoutePath.WORKER_TASKS}/${wrk.id}`}
+                                        state={{
+                                            workerFirstName: wrk.firstName,
+                                            workerLastName: wrk.lastName,
+                                            workerPosition: wrk.position,
+                                        }}
+                                    >
+                                        {wrk.firstName} {wrk.lastName}
                                     </Link>
                                 }
-                                description={item.position}
+                                description={wrk.position}
                             />
                         </Skeleton>
                     </List.Item>

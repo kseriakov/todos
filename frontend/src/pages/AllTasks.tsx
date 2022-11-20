@@ -1,14 +1,13 @@
-import { Button, Pagination } from "antd";
+import { Button, Pagination, Row } from "antd";
 import { useState } from "react";
 import ModalTaskForm from "../components/ModalTaskForm";
 import TaskList from "../components/TaskList";
 import { useArray } from "../hooks/useArray";
 import { ITask } from "../models/task";
-import { taskData } from "./WorkerTasks";
+import { taskAPI } from "../services/taskAPI";
 
 const AllTasks: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const { data: tasks, actionData, deleteData } = useArray(taskData);
     const [currentTask, setCurrentTask] = useState<ITask>({} as ITask);
 
     return (
@@ -17,28 +16,16 @@ const AllTasks: React.FC = () => {
                 <ModalTaskForm
                     isModalOpen={isModalOpen}
                     setIsModalOpen={setIsModalOpen}
-                    currentItem={{} as ITask}
-                    actionItem={actionData}
+                    currentTask={{} as ITask}
                 />
                 <Button type="dashed" onClick={() => setIsModalOpen(true)}>
                     Добавить поручение
                 </Button>
             </div>
             <TaskList
-                tasks={tasks}
-                changeTask={actionData}
-                deleteTask={deleteData}
                 currentTask={currentTask}
                 setCurrentTask={setCurrentTask}
             />
-            <div className="content__pagination">
-                <Pagination
-                    onChange={(e) => console.log(e)}
-                    pageSize={5}
-                    total={15}
-                    responsive={true}
-                />
-            </div>
         </div>
     );
 };

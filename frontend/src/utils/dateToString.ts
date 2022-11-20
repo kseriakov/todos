@@ -12,6 +12,6 @@ const dateToString = (date: Date | undefined): string => {
     const day =
         date.getDate() < 10 ? `0${date.getDate()}` : `${date.getDate()}`;
 
-    return `${day}-${month}-${year}`;
+    return `${year}-${month}-${day}`;
 };
 export default dateToString;

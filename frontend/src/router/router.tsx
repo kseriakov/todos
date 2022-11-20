@@ -8,36 +8,40 @@ import {
 import Workers from "../pages/Workers";
 import AllTasks from "../pages/AllTasks";
 import WorkerTasks from "../pages/WorkerTasks";
+import { NotFound } from "../pages/NotFound";
 
 export enum RoutePath {
     LOGIN = "/login",
     WORKERS = "/workers",
-    TASKS = "/tasks",
+    WORKER_TASKS = "/worker",
     ALL_TASKS = "/",
     REDIRECT = "*",
 }
 
 export const RouteForNavbar = new Map([
     [GeneralLinksNavbar.LOGIN as string, RoutePath.LOGIN],
-    [GeneralLinksNavbar.LOGOUT, RoutePath.ALL_TASKS],
+    [GeneralLinksNavbar.LOGOUT, RoutePath.LOGIN],
     [CheifLinksNavbar.TASKS_ON_CONTROL, RoutePath.ALL_TASKS],
     [CheifLinksNavbar.MY_WORKES, RoutePath.WORKERS],
-    [UserLinksNavbar.TASKS + "/:id", RoutePath.TASKS],
+    [UserLinksNavbar.TASKS, RoutePath.ALL_TASKS],
 ]);
 
 export const publicRoutes: IRoute[] = [
     { path: RoutePath.LOGIN, element: <Login /> },
-    { path: RoutePath.REDIRECT, element: <Login /> },
+    { path: RoutePath.REDIRECT, element: <NotFound /> },
 ];
 
 export const privateChiefRoutes: IRoute[] = [
     { path: RoutePath.ALL_TASKS, element: <AllTasks /> },
     { path: RoutePath.WORKERS, element: <Workers /> },
-    { path: RoutePath.TASKS + "/:id", element: <WorkerTasks /> },
-    { path: RoutePath.REDIRECT, element: <AllTasks /> },
+    { path: RoutePath.WORKER_TASKS + "/:id", element: <WorkerTasks /> },
+    { path: RoutePath.REDIRECT, element: <NotFound /> },
 ];
 
-export const privateUserRoutes: IRoute[] = [
-    { path: RoutePath.TASKS, element: <WorkerTasks /> },
-    { path: RoutePath.REDIRECT, element: <WorkerTasks /> },
+export const privateUserRoutes = (workerId: number | null): IRoute[] => [
+    {
+        path: RoutePath.ALL_TASKS,
+        element: <WorkerTasks workerId={workerId} />,
+    },
+    { path: RoutePath.REDIRECT, element: <NotFound /> },
 ];

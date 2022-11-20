@@ -1,0 +1,25 @@
+{
+    "python.formatting.provider": "black",
+    "python.formatting.blackArgs": [
+        "--skip-string-normalization",
+        "--line-length",
+        "80"
+    ],
+    "python.linting.flake8Enabled": true,
+    "python.linting.flake8Args": [
+        "--max-line-length=120",
+        "--ignore=E402,F841,F401,E302,E305,E712"
+    ],
+    "python.linting.enabled": true,
+    "python.languageServer": "Pylance",
+    "python.analysis.autoImportCompletions": false,
+    "python.analysis.completeFunctionParens": true,
+    "python.analysis.importFormat": "relative",
+    "python.analysis.typeCheckingMode": "off",
+    "python.analysis.indexing": true,
+    "python.analysis.packageIndexDepths": [
+        // { "name": "", "depth": 3, "includeAllSymbols": true },
+        { "name": "django", "depth": 2, "includeAllSymbols": true },
+        { "name": "rest_framework", "depth": 2, "includeAllSymbols": true }
+    ]
+}

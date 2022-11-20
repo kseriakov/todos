@@ -5,129 +5,111 @@ import React from "react";
 import TaskButtons from "../components/TaskButtons";
 import { ITask } from "../models/task";
 import { TaskStatus } from "../enums/task";
-import { useArray } from "../hooks/useArray";
 import ModalTaskForm from "../components/ModalTaskForm";
-import { useParams } from "react-router-dom";
-import { UserRole } from "../enums/navbar";
-import { role } from "../components/AppRoutes";
+import { useAppSelector } from "../hooks/useAppSelector";
+import { taskAPI } from "../services/taskAPI";
+import { LoadMore } from "../components/LoadMore";
+import { reverseDate } from "../utils/reverseDateData";
+import { useLocation, useParams } from "react-router-dom";
 
-export const taskData: ITask[] = [
-    {
-        id: 1,
-        worker: "User1",
-        workerId: "1",
-        text: "A dog is a type of domesticated animal. Known for its loyalty and faithfulness, it can be found as a welcome guest in many householdsacross the world.",
-        date: "20-10-2022",
-        isCompleted: false,
-        isActive: true,
-        isClosed: false,
-    },
-    {
-        id: 2,
-        worker: "User2",
-        workerId: "2",
-        text: "A dog is a type of domesticated animal. Known for its loyalty and faithfulness, it can be found as a welcome guest in many householdsacross the world.",
-        date: "21-10-2022",
-        isCompleted: false,
-        isActive: true,
-        isClosed: false,
-    },
-    {
-        id: 3,
-        worker: "User3",
-        workerId: "3",
-        text: "A dog is a type of domesticated animal. Known for its loyalty and faithfulness, it can be found as a welcome guest in many householdsacross the world.",
-        date: "22-10-2022",
-        isCompleted: false,
-        isActive: true,
-        isClosed: false,
-    },
-    {
-        id: 4,
-        worker: "User4",
-        workerId: "4",
-        text: "A dog is a type of domesticated animal. Known for its loyalty and faithfulness, it can be found as a welcome guest in many householdsacross the world.",
-        date: "23-10-2022",
-        isCompleted: true,
-        isActive: false,
-        isClosed: false,
-    },
-];
+interface WorkerTasksProps {
+    workerId?: number | null;
+}
 
-const WorkerTasks: React.FC = () => {
-    const [loading, setLoading] = useState<boolean>(true);
+interface WorkerLocation {
+    state: {
+        workerFirstName: string | null;
+        workerLastName: string | null;
+        workerPosition: string | null;
+    } | null;
+}
+
+const WorkerTasks: React.FC<WorkerTasksProps> = ({ workerId }) => {
+    const { id } = useParams<{ id: string }>();
+
+    const { state } = useLocation() as WorkerLocation;
+
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [currentTask, setCurrentTask] = useState<ITask>({} as ITask);
 
-    const {
-        data: tasks,
-        actionData: changeTask,
-        deleteData: deleteTask,
-    } = useArray(taskData);
-
-    let id = "1"; // будем получать для пользователя
-    const params = useParams();
-    const workerId = params.id ?? id;
-
-    const workerTasks = useMemo(
-        () => tasks.filter((item) => item.workerId === workerId),
-        [tasks]
+    const { isChief, firstName, lastName, position } = useAppSelector(
+        ({ auth }) => auth
     );
 
-    setTimeout(() => {
-        setLoading(false);
-    }, 500);
+    const [limitPage, setLimitPage] = useState<number>(5);
+
+    const {
+        data: taskResponse,
+        isFetching,
+        isLoading,
+    } = taskAPI.useGetWorkerTasksQuery({
+        limit: limitPage,
+        id: workerId || id,
+    });
+
+    const onLoad = () => {
+        setLimitPage((limitPage) => limitPage + 5);
+    };
 
     return (
         <div className="content__tasks">
-            {role === (UserRole.CHIEF as UserRole) ? (
+            {isChief ? (
                 <ModalTaskForm
                     isModalOpen={isModalOpen}
                     setIsModalOpen={setIsModalOpen}
-                    currentItem={currentTask}
-                    actionItem={changeTask}
+                    currentTask={currentTask}
                 />
             ) : null}
 
-            <h1>User1</h1>
-            <List
-                loading={loading}
-                itemLayout="horizontal"
-                // loadMore={loadMore}
-                dataSource={workerTasks}
-                renderItem={(item) => (
-                    <List.Item>
-                        <Skeleton avatar title={false} loading={loading} active>
+            <h1>
+                {state
+                    ? `${state.workerFirstName} ${
+                          state.workerLastName
+                      }, ${state.workerPosition?.toLowerCase()}`
+                    : null}
+            </h1>
+            <Skeleton active paragraph loading={isLoading}>
+                <List
+                    itemLayout="horizontal"
+                    loadMore={
+                        <LoadMore
+                            isLoading={!isLoading && isFetching}
+                            isMore={taskResponse?.next !== null}
+                            handlerAction={() => onLoad()}
+                        />
+                    }
+                    dataSource={taskResponse?.results}
+                    renderItem={(task) => (
+                        <List.Item>
                             <List.Item.Meta
                                 title={
                                     <div className="content__task-title">
-                                        <TasksStatusText task={item} />
-                                        {item.date}
+                                        <TasksStatusText task={task} />
+                                        {reverseDate(task.date)}
                                     </div>
                                 }
                                 description={
                                     <p
                                         className={`content__task-description ${
-                                            item.isClosed
+                                            task.isClosed
                                                 ? "content__task-complete"
                                                 : ""
                                         }`}
                                     >
-                                        {item.text}
+                                        {task.text}
                                     </p>
                                 }
                             />
-                        </Skeleton>
-                        <TaskButtons
-                            task={item}
-                            changeTask={changeTask}
-                            deleteTask={deleteTask}
-                            setIsModalOpen={setIsModalOpen}
-                            setCurrentTask={setCurrentTask}
-                        />
-                    </List.Item>
-                )}
-            />
+
+                            <TaskButtons
+                                task={task}
+                                setIsModalOpen={setIsModalOpen}
+                                setCurrentTask={setCurrentTask}
+                            />
+                        </List.Item>
+                    )}
+                />
+            </Skeleton>
         </div>
     );
 };

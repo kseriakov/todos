@@ -3,17 +3,21 @@ import { Header } from "antd/lib/layout/layout";
 import { MenuInfo } from "rc-menu/lib/interface";
 import { To, useNavigate } from "react-router-dom";
 import {
-    UserRole,
     GeneralLinksNavbar,
     CheifLinksNavbar,
     UserLinksNavbar,
 } from "../enums/navbar";
-
+import { useAppDispatch } from "../hooks/useAppDispatch";
+import { useAppSelector } from "../hooks/useAppSelector";
 import { RouteForNavbar } from "../router/router";
-import { role } from "./AppRoutes";
+import { actions } from "../store/actions";
 
 const Navbar: React.FC = () => {
-    const isAuth = true;
+    const { isAuth, isChief, lastName, firstName } = useAppSelector(
+        ({ auth }) => auth
+    );
+
+    const dispatch = useAppDispatch();
 
     const navigate = useNavigate();
 
@@ -21,22 +25,30 @@ const Navbar: React.FC = () => {
         ? GeneralLinksNavbar.LOGOUT
         : GeneralLinksNavbar.LOGIN;
 
-    const links: string[] =
-        role === (UserRole.CHIEF as UserRole)
-            ? [
-                  CheifLinksNavbar.TASKS_ON_CONTROL,
-                  CheifLinksNavbar.MY_WORKES,
-                  authLink,
-              ]
-            : [UserLinksNavbar.TASKS, authLink];
+    const links: string[] = isChief
+        ? [
+              CheifLinksNavbar.TASKS_ON_CONTROL,
+              CheifLinksNavbar.MY_WORKES,
+              authLink,
+          ]
+        : !isChief && isAuth
+        ? [UserLinksNavbar.TASKS, authLink]
+        : [authLink];
 
     const goToLink = (e: MenuInfo) => {
+        if (e.key === GeneralLinksNavbar.LOGOUT) {
+            dispatch(actions.logout());
+        }
+
         navigate(RouteForNavbar.get(e.key) as To);
     };
 
     return (
         <Header className="header">
             <Row justify="end">
+                <div className="header__username">
+                    {firstName && lastName ? `${firstName} ${lastName}` : ""}
+                </div>
                 <Menu
                     onClick={(e) => goToLink(e)}
                     theme="dark"

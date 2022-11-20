@@ -8,7 +8,7 @@
         flex-direction: column;
         justify-content: space-around;
 
-        .content__panel  {
+        .content__panel {
             font-size: $fs-main;
             line-height: $ln-main;
         }
@@ -84,6 +84,52 @@
 
     &__load {
         margin-top: 15px;
+    }
+
+    &__login {
+        padding-top: 50px;
+    }
+    &__spinner {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: rgb(200, 208, 208);
+        z-index: 10;
+        opacity: 0.4;
+    }
+
+    &__spin {
+    }
+
+    &__notfound {
+        text-align: center;
+        padding-top: 150px;
+        
+        button {
+            border: none;
+            background-color: inherit;
+            text-decoration: underline;
+            cursor: pointer;
+            color: blue;
+        }
+    }
+}
+
+.login {
+    &__title {
+        text-align: center;
+        padding: 15px 0;
+    }
+    &__error {
+        text-align: center;
+        color: red;
+        font-weight: 700;
+        transition: all 0.5s;
     }
 }
 

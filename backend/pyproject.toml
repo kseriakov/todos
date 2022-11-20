@@ -1,0 +1,8 @@
+[tool.black]
+
+# Исключаем из проверки
+extend-exclude = '''
+/(
+  venv
+)/
+''' 

@@ -1,0 +1,10 @@
+#!/bin/sh
+
+set -o errexit
+set -o pipefail
+set -o nounset
+
+python3 backend/manage.py migrate --no-input
+python3 backend/manage.py collectstatic --no-input
+gunicorn --reload --workers 2 --bind 0.0.0.0:8888 --chdir ./backend todos.wsgi
+

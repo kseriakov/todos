@@ -1,25 +1,27 @@
 import { Form, Input, Button, DatePicker, Modal } from "antd";
 import { useRef, useState } from "react";
-import { IWorker } from "../models/worker";
+import { IUser } from "../models/user";
+import { workerAPI } from "../services/workerAPI";
 import dateToString from "../utils/dateToString";
 import { required } from "../utils/formFields";
 
-interface ModalUserFormProps {
-    createWorker: (worker: IWorker) => void;
-}
+const ModalUserForm: React.FC = () => {
+    const [createWorker, { isLoading: loadingCreate }] =
+        workerAPI.useCreateWorkerMutation();
 
-const ModalUserForm: React.FC<ModalUserFormProps> = ({ createWorker }) => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const submitRef = useRef(null) as React.RefObject<HTMLButtonElement> | null;
 
-    const onCreate = (
-        data: Omit<IWorker, "birthdate"> & Record<"birthdate", moment.Moment>
+    const onCreate = async (
+        data: Omit<IUser, "birthdate"> & Record<"birthdate", moment.Moment>
     ) => {
-        createWorker({
-            ...data,
+        await createWorker({
+            email: data.email,
+            first_name: data.firstName,
+            last_name: data.lastName,
+            position: data.position,
             birthdate: dateToString(data.birthdate.toDate()),
-        } as IWorker);
-
+        });
         setIsModalOpen(false);
     };
 
@@ -36,6 +38,19 @@ const ModalUserForm: React.FC<ModalUserFormProps> = ({ createWorker }) => {
                 cancelText="Закрыть"
                 okText="Применить"
                 onOk={() => submitRef?.current?.click()}
+                footer={[
+                    <Button key="back" onClick={() => setIsModalOpen(false)}>
+                        Закрыть
+                    </Button>,
+                    <Button
+                        key="submit"
+                        type="primary"
+                        loading={loadingCreate}
+                        onClick={() => submitRef?.current?.click()}
+                    >
+                        Создать
+                    </Button>,
+                ]}
             >
                 <Form name="worker" onFinish={(data) => onCreate(data)}>
                     <Form.Item
@@ -66,11 +81,7 @@ const ModalUserForm: React.FC<ModalUserFormProps> = ({ createWorker }) => {
                     >
                         <Input />
                     </Form.Item>
-                    <Form.Item
-                        name="birthdate"
-                        label="День рождения"
-                        rules={[required("Заполните поле")]}
-                    >
+                    <Form.Item name="birthdate" label="День рождения">
                         <DatePicker
                             format="DD-MM-YYYY"
                             placeholder="Выберите дату"

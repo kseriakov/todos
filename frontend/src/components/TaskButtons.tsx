@@ -1,39 +1,45 @@
 import { Row, Button } from "antd";
 import { UserRole } from "../enums/navbar";
+import { useAppSelector } from "../hooks/useAppSelector";
 import { ITask } from "../models/task";
-import { role } from "./AppRoutes";
+import { taskAPI } from "../services/taskAPI";
 
 interface TaskButtonsProps {
     task: ITask;
     setCurrentTask: (task: ITask) => void;
-    changeTask: (task: ITask) => void;
-    deleteTask: (task: ITask) => void;
+    setIdForCloseStyle?: (id: number) => void;
     setIsModalOpen: (isModalOpen: boolean) => void;
 }
 
 const TaskButtons: React.FC<TaskButtonsProps> = ({
     task,
     setCurrentTask,
-    changeTask,
-    deleteTask,
+    setIdForCloseStyle,
     setIsModalOpen,
 }) => {
-    const onCloseTask = () => {
-        changeTask({
-            ...task,
-            isClosed: true,
-            isActive: false,
-            isCompleted: true,
-        });
-    };
+    const { isChief } = useAppSelector(({ auth }) => auth);
 
-    const onDeleteTask = (task: ITask) => {
-        deleteTask(task);
+    const [updateTask, {}] = taskAPI.useChangeTaskMutation();
+    const [deleteTask, {}] = taskAPI.useDeleteTaskMutation();
+    const [completeTask, {}] = taskAPI.useCompleteTaskMutation();
+
+    const onCloseTask = () => {
+        setIdForCloseStyle && setIdForCloseStyle(task.id);
+        setTimeout(
+            () =>
+                updateTask({
+                    id: task.id,
+                    is_active: false,
+                    is_completed: true,
+                    is_closed: true,
+                }),
+            700
+        );
     };
 
     return (
         <Row>
-            {role === (UserRole.CHIEF as UserRole) ? (
+            {isChief ? (
                 <>
                     <Button
                         onClick={() => onCloseTask()}
@@ -54,14 +60,16 @@ const TaskButtons: React.FC<TaskButtonsProps> = ({
                         Корректировать
                     </Button>
 
-                    <Button danger onClick={() => onDeleteTask(task)}>
+                    <Button danger onClick={() => deleteTask(task.id)}>
                         Удалить
                     </Button>
                 </>
             ) : (
                 <Button
                     style={{ color: "green" }}
-                    onClick={() => changeTask({ ...task, isCompleted: true })}
+                    onClick={() =>
+                        completeTask({ id: task.id, is_completed: true })
+                    }
                 >
                     Выполнено
                 </Button>
