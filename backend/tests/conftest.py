@@ -44,13 +44,27 @@ def superuser(db, user_factory):
 
 # Фикстура для выполнения запросов к API
 @pytest.fixture
-def get_auth_request() -> Callable[[str, UserTodos, APIView], Any]:
-    def inner(path: str, user: UserTodos, ViewClass: APIView):
+def get_auth_request() -> Callable[
+    [str, UserTodos, APIView, str, int | str | None], Any
+]:
+    def inner(
+        path: str,
+        user: UserTodos,
+        ViewClass: APIView,
+        url_params: str = '',
+        pk: int | str | None = None,
+    ):
         api_client = APIRequestFactory()
-        request = api_client.get(path)
+        request = api_client.get(f'{path}{url_params}')
         force_authenticate(request, user)
+
         view = ViewClass.as_view()
-        response = view(request)
+
+        if pk is not None:
+            response = view(request, pk=pk)
+        else:
+            response = view(request)
+
         return response
 
     return inner
@@ -105,7 +119,19 @@ def get_fake_user_data():
         'last_name': fake.last_name(),
         'birthdate': fake.date_of_birth(minimum_age=20, maximum_age=50),
         'position': fake.job(),
-        'chief_id': 111,
+        'chief_id': fake.pyint(),
+    }
+
+
+@pytest.fixture
+def get_fake_chief_data():
+    return {
+        'email': fake.free_email(),
+        'first_name': fake.first_name(),
+        'last_name': fake.last_name(),
+        'birthdate': fake.date_of_birth(minimum_age=20, maximum_age=50),
+        'position': fake.job(),
+        'password': fake.pyint(min_value=4, max_value=5),
     }
 
 

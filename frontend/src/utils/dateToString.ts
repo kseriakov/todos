@@ -1,6 +1,6 @@
-const dateToString = (date: Date | undefined): string => {
+const dateToString = (date: Date | undefined): string | null => {
     if (!date) {
-        return "";
+        return null;
     }
 
     const year = `${date.getFullYear()}`;

@@ -1,12 +1,5 @@
-import {
-    BaseQueryFn,
-    createApi,
-    fetchBaseQuery,
-} from "@reduxjs/toolkit/query/react";
-import axios, { AxiosRequestConfig, AxiosError } from "axios";
-import { url } from "inspector";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { ITask } from "../models/task";
-import { store } from "../store/store";
 import { API } from "./api";
 import { APIUser } from "./apiUser";
 import { ITaskResponse, ITaskAPIData, ITaskCreateData } from "./types";

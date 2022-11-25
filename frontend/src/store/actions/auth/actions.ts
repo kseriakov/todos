@@ -63,7 +63,7 @@ export const login =
 
 export const getMyProfileData = () => async (dispatch: AppDispatch) => {
     dispatch(authLoading());
-    
+
     const refreshToken = localStorage.getItem("refreshToken");
     const accessToken = localStorage.getItem("accessToken");
 
@@ -97,26 +97,14 @@ export const getMyProfileData = () => async (dispatch: AppDispatch) => {
     }
 };
 
-export const checkAuthStatus =
-    () => async (dispatch: AppDispatch, getState: () => RootState) => {
-        await dispatch(refreshTokens());
-        await dispatch(getMyProfileData());
-
-        if (getState().auth.isAuth) {
-            setInterval(() => {
-                dispatch(refreshTokens());
-            }, 1000 * 60 * 5);
-        }
-    };
-
 export const refreshTokens =
     () => async (dispatch: AppDispatch, getState: () => RootState) => {
-        dispatch(authLoading());
+        // dispatch(authLoading());
 
         const refreshToken = localStorage.getItem("refreshToken");
 
         if (!refreshToken) {
-            return dispatch(logout());
+            return {}; //dispatch(logout());
         }
 
         try {
@@ -129,22 +117,40 @@ export const refreshTokens =
                     localStorage.setItem("accessToken", access);
                     localStorage.setItem("refreshToken", refresh);
 
-                    dispatch(
-                        authSuccess({
-                            ...getState().auth,
-                            accessToken: access,
-                            refreshToken: refresh,
-                        })
-                    );
+                    return {
+                        access,
+                        refresh,
+                    };
+                    // dispatch(
+                    //     authSuccess({
+                    //         ...getState().auth,
+                    //         accessToken: access,
+                    //         refreshToken: refresh,
+                    //     })
+                    // );
                 }
             }
         } catch (err: AxiosError | any) {
-            dispatch(logout());
+            // dispatch(logout());
 
             if (err instanceof AxiosError) {
                 dispatch(authError(err?.response?.status as number));
             } else {
                 dispatch(authError(err.message));
             }
+        }
+    };
+
+export const checkAuthStatus =
+    () => async (dispatch: AppDispatch, getState: () => RootState) => {
+        const { accessToken, refreshToken } = refreshTokens();
+
+        await dispatch(refreshTokens());
+        await dispatch(getMyProfileData());
+
+        if (getState().auth.isAuth) {
+            setInterval(() => {
+                dispatch(refreshTokens());
+            }, 1000 * 60 * 5);
         }
     };

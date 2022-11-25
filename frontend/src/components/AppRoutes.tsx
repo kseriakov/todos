@@ -1,19 +1,11 @@
-import { Layout } from "antd";
-import { Content } from "antd/lib/layout/layout";
 import { useEffect } from "react";
-import { Route, Routes } from "react-router-dom";
-import { useAppDispatch } from "../hooks/useAppDispatch";
+import { RouterProvider } from "react-router-dom";
 
+import { useAppDispatch } from "../hooks/useAppDispatch";
 import { useAppSelector } from "../hooks/useAppSelector";
-import {
-    privateChiefRoutes,
-    privateUserRoutes,
-    publicRoutes,
-} from "../router/router";
+import { indexRouter } from "../router/router";
 import { actions } from "../store/actions";
 import { Spinner } from "../UI/Spinner";
-import AppFooter from "./AppFooter";
-import Navbar from "./Navbar";
 
 const AppRoutes: React.FC = () => {
     const { isAuth, loading, isChief, id } = useAppSelector(({ auth }) => auth);
@@ -24,29 +16,9 @@ const AppRoutes: React.FC = () => {
         dispatch(actions.checkAuthStatus());
     }, []);
 
-    const routes = isAuth
-        ? isChief
-            ? privateChiefRoutes
-            : privateUserRoutes(id)
-        : publicRoutes;
+    const router = indexRouter(isAuth, isChief, id);
 
-    return (
-        <Layout className="wrapper">
-            <Navbar />
-            <Content className="content">
-                {loading ? (
-                    <Spinner />
-                ) : (
-                    <Routes>
-                        {routes.map((route) => (
-                            <Route key={route.path} {...route} />
-                        ))}
-                    </Routes>
-                )}
-            </Content>
-            <AppFooter />
-        </Layout>
-    );
+    return <RouterProvider router={router} fallbackElement={<Spinner />} />;
 };
 
 export default AppRoutes;

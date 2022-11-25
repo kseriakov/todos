@@ -50,6 +50,15 @@ export interface ICreateWorkerData {
     email: string;
     first_name: string;
     last_name: string;
-    birthdate: string;
+    birthdate: string | null;
     position: string;
+}
+
+export interface ICreateChiefData {
+    email: string;
+    first_name: string;
+    last_name: string;
+    birthdate: string | null;
+    position: string;
+    password: string;
 }

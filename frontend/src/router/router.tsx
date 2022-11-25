@@ -1,3 +1,6 @@
+import { createBrowserRouter } from "react-router-dom";
+import { Router as RemixRouter } from "@remix-run/router";
+
 import Login from "../pages/Login";
 import IRoute from "./types";
 import {
@@ -9,11 +12,15 @@ import Workers from "../pages/Workers";
 import AllTasks from "../pages/AllTasks";
 import WorkerTasks from "../pages/WorkerTasks";
 import { NotFound } from "../pages/NotFound";
+import { Register } from "../pages/Register";
+import { RootLayout } from "../components/RootLayout";
+
 
 export enum RoutePath {
-    LOGIN = "/login",
-    WORKERS = "/workers",
-    WORKER_TASKS = "/worker",
+    REGISTER = "register",
+    LOGIN = "login",
+    WORKERS = "workers",
+    WORKER_TASKS = "worker",
     ALL_TASKS = "/",
     REDIRECT = "*",
 }
@@ -27,21 +34,35 @@ export const RouteForNavbar = new Map([
 ]);
 
 export const publicRoutes: IRoute[] = [
-    { path: RoutePath.LOGIN, element: <Login /> },
-    { path: RoutePath.REDIRECT, element: <NotFound /> },
+    { index: true, element: <Login /> },
+    { path: RoutePath.REGISTER, element: <Register /> },
+    { path: RoutePath.REDIRECT, element: <Login /> },
 ];
 
 export const privateChiefRoutes: IRoute[] = [
-    { path: RoutePath.ALL_TASKS, element: <AllTasks /> },
+    { element: <AllTasks />, index: true },
     { path: RoutePath.WORKERS, element: <Workers /> },
     { path: RoutePath.WORKER_TASKS + "/:id", element: <WorkerTasks /> },
     { path: RoutePath.REDIRECT, element: <NotFound /> },
 ];
 
 export const privateUserRoutes = (workerId: number | null): IRoute[] => [
-    {
-        path: RoutePath.ALL_TASKS,
-        element: <WorkerTasks workerId={workerId} />,
-    },
+    { index: true, element: <WorkerTasks workerId={workerId} /> },
     { path: RoutePath.REDIRECT, element: <NotFound /> },
 ];
+
+export const indexRouter = (
+    isAuth: boolean,
+    isChief: boolean,
+    id: number | null
+): RemixRouter => {
+    const routes = isAuth
+        ? isChief
+            ? privateChiefRoutes
+            : privateUserRoutes(id)
+        : publicRoutes;
+
+    return createBrowserRouter([
+        { path: "/", element: <RootLayout />, children: routes },
+    ]);
+};

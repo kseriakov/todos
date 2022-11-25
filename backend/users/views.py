@@ -3,17 +3,25 @@ import logging
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.generics import ListAPIView, DestroyAPIView
+from rest_framework.generics import ListAPIView, DestroyAPIView, CreateAPIView
 from rest_framework import status, permissions
 from django.core.exceptions import ObjectDoesNotExist
 
 from .permissions import IsOnlyChief, IsOnlyMyWorker
 from .paginations import UserPagination
 from .models import UserTodos
-from .serializers import UserCreateSerializer, UserSerializer
+from .serializers import (
+    WorkerCreateSerializer,
+    UserSerializer,
+    ChiefCreateSerilaizer,
+)
 
 
 logger = logging.getLogger(__name__)
+
+
+class RegisterChiefAPIView(CreateAPIView):
+    serializer_class = ChiefCreateSerilaizer
 
 
 class ChiefWorkersListView(APIView):
@@ -40,7 +48,7 @@ class CreateWorkerAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated, IsOnlyChief]
 
     def post(self, request):
-        serializer = UserCreateSerializer(
+        serializer = WorkerCreateSerializer(
             data=request.data, context={'chief_id': request.user.id}
         )
 

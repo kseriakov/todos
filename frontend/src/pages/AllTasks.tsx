@@ -1,10 +1,8 @@
-import { Button, Pagination, Row } from "antd";
+import { Button } from "antd";
 import { useState } from "react";
 import ModalTaskForm from "../components/ModalTaskForm";
 import TaskList from "../components/TaskList";
-import { useArray } from "../hooks/useArray";
 import { ITask } from "../models/task";
-import { taskAPI } from "../services/taskAPI";
 
 const AllTasks: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);

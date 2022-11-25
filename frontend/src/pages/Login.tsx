@@ -8,6 +8,7 @@ import { actions } from "../store/actions";
 import { AuthError } from "../enums/error";
 import { Spinner } from "../UI/Spinner";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 interface IFormData {
     email: string;
@@ -27,8 +28,9 @@ const Login: React.FC = () => {
     return (
         <div className="content__login login">
             <h1 className="login__title">
-                Войдите на сайт или заполните <a href="#">форму регистрации</a>,
-                если вы руководитель
+                Войдите на сайт или заполните
+                <Link to="/register"> форму регистрации</Link>, если вы
+                руководитель
             </h1>
             <h2 className="login__error">
                 {error === 401 ? AuthError.STATUS_CODE_401 : null}

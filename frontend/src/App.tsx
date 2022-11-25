@@ -1,18 +1,19 @@
 import "antd/dist/antd.css";
 import "./styles/index.scss";
 
-import React from "react";
+import React, { lazy } from "react";
 
-import AppRoutes from "./components/AppRoutes";
-import { BrowserRouter } from "react-router-dom";
+import { Spinner } from "./UI/Spinner";
+
+const Routes = lazy(() => import("./components/AppRoutes"));
 
 const App: React.FC = () => {
     return (
-        <BrowserRouter>
-            <div className="container">
-                <AppRoutes />
-            </div>
-        </BrowserRouter>
+        <div className="container">
+            <React.Suspense fallback={<Spinner />}>
+                <Routes />
+            </React.Suspense>
+        </div>
     );
 };
 

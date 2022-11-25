@@ -1,4 +1,5 @@
 export default interface IRoute {
-    path: string;
+    path?: string;
     element: JSX.Element;
+    index?: boolean;
 }

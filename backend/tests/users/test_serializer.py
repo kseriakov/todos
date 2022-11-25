@@ -1,5 +1,25 @@
-from users.serializers import UserSerializer
+from faker import Faker
+from todos.settings import DEFAULT_FROM_EMAIL
+from users.serializers import ChiefCreateSerilaizer, UserSerializer
 from users.models import UserTodos
+
+fake = Faker()
+
+
+def test_chief_create_serializer(mailoutbox, chief_user):
+    chief_data = {
+        'email': fake.free_email(),
+        'first_name': chief_user.first_name,
+        'last_name': chief_user.last_name,
+        'birthdate': chief_user.birthdate.strftime('%Y-%m-%d'),
+        'position': chief_user.position,
+        'password': fake.pyint(min_value=4, max_value=5),
+    }
+
+    serializer = ChiefCreateSerilaizer(data=chief_data)
+    assert serializer.is_valid() == True
+    chief = serializer.save()
+    assert chief.is_chief == True
 
 
 def test_worker_user_serializer(worker_user: UserTodos):

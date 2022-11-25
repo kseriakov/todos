@@ -57,7 +57,7 @@ const ModalTaskForm: React.FC<ModalTaskFormProps> = ({
             await createTask({
                 worker_id: data.workerId,
                 text: data.text,
-                date: dateToString(data.datePicker.toDate()),
+                date: dateToString(data.datePicker.toDate()) as string,
             });
         }
 
@@ -65,7 +65,7 @@ const ModalTaskForm: React.FC<ModalTaskFormProps> = ({
     };
 
     return (
-        <div className="content__modal">
+        <div>
             <Modal
                 forceRender={true}
                 title="Поручение"

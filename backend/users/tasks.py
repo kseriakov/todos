@@ -9,7 +9,7 @@ def send_no_blocking_mail(
     message: str,
     from_email: str,
     recipient_list: list[str],
-    html_message: str,
+    html_message: str = '',
     fail_silently=True,
 ):
     send_mail(
