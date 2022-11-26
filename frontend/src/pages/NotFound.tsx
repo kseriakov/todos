@@ -10,7 +10,7 @@ export const NotFound: React.FC = () => {
     const { isAuth } = useAppSelector(({ auth }) => auth);
 
     useEffect(() => {
-        if (location.pathname === RoutePath.LOGIN && isAuth) {
+        if (location.pathname.includes(RoutePath.LOGIN) && isAuth) {
             navigate(RoutePath.ALL_TASKS);
         }
     }, []);

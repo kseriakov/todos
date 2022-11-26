@@ -31,7 +31,8 @@ const ModalTaskForm: React.FC<ModalTaskFormProps> = ({
     const { data: workers } = workerAPI.useGetMyWorkersQuery();
     const [createTask, { isLoading: loadingCreate }] =
         taskAPI.useCreateTaskMutation();
-    const [changeTask, {}] = taskAPI.useChangeTaskMutation();
+    const [changeTask, { isLoading: loadingUpdate }] =
+        taskAPI.useChangeTaskMutation();
 
     useEffect(() => {
         const datePicker = dateToMoment(currentTask.date);
@@ -81,7 +82,7 @@ const ModalTaskForm: React.FC<ModalTaskFormProps> = ({
                     <Button
                         key="submit"
                         type="primary"
-                        loading={loadingCreate}
+                        loading={loadingCreate || loadingUpdate}
                         onClick={() => submitRef?.current?.click()}
                     >
                         Применить

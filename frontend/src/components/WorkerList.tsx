@@ -27,7 +27,6 @@ const WorkerList: React.FC = () => {
             }));
         }
         setWorkerSelected(worker);
-
         setIsTaskModalOpen(true);
     };
 
@@ -39,74 +38,77 @@ const WorkerList: React.FC = () => {
                 currentTask={currentTask}
                 workerSelected={workerSelected}
             />
-
-            <List
-                loading={isLoading}
-                itemLayout="horizontal"
-                dataSource={workers}
-                renderItem={(wrk) => (
-                    <List.Item
-                        actions={[
-                            <Button
-                                key="all-taks"
-                                className="content__worker-btn"
-                                onClick={(e) =>
-                                    navigate(
-                                        `${RoutePath.WORKER_TASKS}/${wrk.id}`,
-                                        {
-                                            state: {
+            <Skeleton loading={isLoading}>
+                <List
+                    itemLayout="horizontal"
+                    dataSource={workers}
+                    renderItem={(wrk) => (
+                        <List.Item
+                            actions={[
+                                <Button
+                                    key="all-taks"
+                                    className="content__worker-btn"
+                                    onClick={(e) =>
+                                        navigate(
+                                            `/${RoutePath.WORKER_TASKS}/${wrk.id}`,
+                                            {
+                                                state: {
+                                                    workerFirstName:
+                                                        wrk.firstName,
+                                                    workerLastName:
+                                                        wrk.lastName,
+                                                    workerPosition:
+                                                        wrk.position,
+                                                },
+                                            }
+                                        )
+                                    }
+                                >
+                                    Все поручения
+                                </Button>,
+                                <Button
+                                    key="new-taks"
+                                    className="content__worker-btn"
+                                    onClick={() => onCreateTask(wrk)}
+                                    style={{ color: "green" }}
+                                >
+                                    Новое
+                                </Button>,
+                                <Button
+                                    className="content__worker-delete content__worker-btn"
+                                    key="delete-worker"
+                                    onClick={() => deleteWorker(wrk.id)}
+                                >
+                                    Удалить сотрудника
+                                </Button>,
+                            ]}
+                        >
+                            <Skeleton
+                                avatar
+                                title={false}
+                                loading={isLoading}
+                                active
+                            >
+                                <List.Item.Meta
+                                    title={
+                                        <Link
+                                            to={`/${RoutePath.WORKER_TASKS}/${wrk.id}`}
+                                            state={{
                                                 workerFirstName: wrk.firstName,
                                                 workerLastName: wrk.lastName,
                                                 workerPosition: wrk.position,
-                                            },
-                                        }
-                                    )
-                                }
-                            >
-                                Все поручения
-                            </Button>,
-                            <Button
-                                key="new-taks"
-                                className="content__worker-btn"
-                                onClick={() => onCreateTask(wrk)}
-                                style={{ color: "green" }}
-                            >
-                                Новое
-                            </Button>,
-                            <Button
-                                className="content__worker-delete content__worker-btn"
-                                key="delete-worker"
-                                onClick={() => deleteWorker(wrk.id)}
-                            >
-                                Удалить сотрудника
-                            </Button>,
-                        ]}
-                    >
-                        <Skeleton
-                            avatar
-                            title={false}
-                            loading={isLoading}
-                            active
-                        >
-                            <List.Item.Meta
-                                title={
-                                    <Link
-                                        to={`${RoutePath.WORKER_TASKS}/${wrk.id}`}
-                                        state={{
-                                            workerFirstName: wrk.firstName,
-                                            workerLastName: wrk.lastName,
-                                            workerPosition: wrk.position,
-                                        }}
-                                    >
-                                        {wrk.firstName} {wrk.lastName}
-                                    </Link>
-                                }
-                                description={wrk.position}
-                            />
-                        </Skeleton>
-                    </List.Item>
-                )}
-            />
+                                            }}
+                                        >
+                                            {wrk.firstName} {wrk.lastName}
+                                        </Link>
+                                    }
+                                    description={wrk.position}
+                                />
+                            </Skeleton>
+                        </List.Item>
+                    )}
+                />
+            </Skeleton>
         </>
     );
 };

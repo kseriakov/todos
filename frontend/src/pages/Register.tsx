@@ -1,5 +1,7 @@
 import { Button, Col, Form, Input, Row, DatePicker } from "antd";
-import { useEffect, useState } from "react";
+import { useForm } from "antd/lib/form/Form";
+import { useEffect, useRef, useState } from "react";
+import { AuthError } from "../enums/error";
 
 import { chiefAPI } from "../services/chiefAPI";
 import { ModalWindow } from "../UI/Modal";
@@ -18,6 +20,9 @@ interface IRegisterData {
 
 export const Register = () => {
     const [modalOpen, setModalOpen] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const [form] = useForm();
 
     const [register, { isLoading, isSuccess, isError }] =
         chiefAPI.useCreateChiefMutation();
@@ -37,6 +42,7 @@ export const Register = () => {
         let startRequest;
 
         if (isSuccess && !startRequest) {
+            form.resetFields();
             setModalOpen(true);
             setTimeout(() => {
                 setModalOpen(false);
@@ -47,10 +53,21 @@ export const Register = () => {
         };
     }, [isSuccess]);
 
+    useEffect(() => {
+        if (isError) {
+            form.resetFields(["password1", "password2"]);
+            setError(AuthError.INVALID_REGISTER_DATA);
+            setTimeout(() => {
+                setError(null);
+            }, 5000);
+        }
+    }, [isError]);
+
     return (
         <div className="content__register register">
-            {/* <ModalWindow isOpen={modalOpen} /> */}
+            <ModalWindow isOpen={modalOpen} setModalOpen={setModalOpen} />
             <h1 className="register__title">Регистрация нового руководителя</h1>
+            <h2 className="register__error">{error}</h2>
             <Row align="middle">
                 <Col flex={4}></Col>
                 <Col flex={5}>
@@ -60,6 +77,7 @@ export const Register = () => {
                         scrollToFirstError
                         labelCol={{ span: 8 }}
                         wrapperCol={{ span: 10 }}
+                        form={form}
                     >
                         <Form.Item
                             name="email"

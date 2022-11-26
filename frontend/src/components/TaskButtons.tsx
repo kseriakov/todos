@@ -19,9 +19,12 @@ const TaskButtons: React.FC<TaskButtonsProps> = ({
 }) => {
     const { isChief } = useAppSelector(({ auth }) => auth);
 
-    const [updateTask, {}] = taskAPI.useChangeTaskMutation();
-    const [deleteTask, {}] = taskAPI.useDeleteTaskMutation();
-    const [completeTask, {}] = taskAPI.useCompleteTaskMutation();
+    const [updateTask, { isLoading: loadingUpdate }] =
+        taskAPI.useChangeTaskMutation();
+    const [deleteTask, { isLoading: loadingDelete }] =
+        taskAPI.useDeleteTaskMutation();
+    const [completeTask, { isLoading: loadingComplete }] =
+        taskAPI.useCompleteTaskMutation();
 
     const onCloseTask = () => {
         setIdForCloseStyle && setIdForCloseStyle(task.id);
@@ -45,6 +48,7 @@ const TaskButtons: React.FC<TaskButtonsProps> = ({
                         onClick={() => onCloseTask()}
                         style={{ color: "green" }}
                         disabled={task.isClosed}
+                        loading={loadingUpdate}
                     >
                         Принять исполнение
                     </Button>
@@ -60,7 +64,11 @@ const TaskButtons: React.FC<TaskButtonsProps> = ({
                         Корректировать
                     </Button>
 
-                    <Button danger onClick={() => deleteTask(task.id)}>
+                    <Button
+                        danger
+                        onClick={() => deleteTask(task.id)}
+                        loading={loadingDelete}
+                    >
                         Удалить
                     </Button>
                 </>
@@ -70,6 +78,7 @@ const TaskButtons: React.FC<TaskButtonsProps> = ({
                     onClick={() =>
                         completeTask({ id: task.id, is_completed: true })
                     }
+                    loading={loadingComplete}
                 >
                     Выполнено
                 </Button>

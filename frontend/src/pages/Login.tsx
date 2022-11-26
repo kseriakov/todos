@@ -1,4 +1,4 @@
-import { Form, Input, Checkbox, Button, Row, Col, Spin } from "antd";
+import { Form, Input, Checkbox, Button, Row, Col, Skeleton } from "antd";
 import { LockOutlined, MailOutlined } from "@ant-design/icons";
 
 import { useAppDispatch } from "../hooks/useAppDispatch";
@@ -6,8 +6,7 @@ import { useAppSelector } from "../hooks/useAppSelector";
 import { required } from "../utils/formFields";
 import { actions } from "../store/actions";
 import { AuthError } from "../enums/error";
-import { Spinner } from "../UI/Spinner";
-import { useNavigate } from "react-router-dom";
+
 import { Link } from "react-router-dom";
 
 interface IFormData {
@@ -17,7 +16,7 @@ interface IFormData {
 }
 
 const Login: React.FC = () => {
-    const { loading, error } = useAppSelector(({ auth }) => auth);
+    const { error } = useAppSelector(({ auth }) => auth);
 
     const dispatch = useAppDispatch();
 
@@ -35,15 +34,12 @@ const Login: React.FC = () => {
             <h2 className="login__error">
                 {error === 401 ? AuthError.STATUS_CODE_401 : null}
             </h2>
-            {loading ? <Spinner /> : null}
-
             <Row align="bottom">
                 <Col flex={4}></Col>
                 <Col flex={3}>
                     <Form
                         name="normal_login"
                         className="login-form"
-                        initialValues={{ remember: true }}
                         onFinish={onFinish}
                     >
                         <Form.Item
@@ -96,7 +92,6 @@ const Login: React.FC = () => {
                             >
                                 Войти
                             </Button>
-                            Или <a href="">зарегистрироваться</a>
                         </Form.Item>
                     </Form>
                 </Col>

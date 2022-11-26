@@ -18,7 +18,7 @@ const AppRoutes: React.FC = () => {
 
     const router = indexRouter(isAuth, isChief, id);
 
-    return <RouterProvider router={router} fallbackElement={<Spinner />} />;
+    return <>{loading ? <Spinner /> : <RouterProvider router={router} />}</>;
 };
 
 export default AppRoutes;

@@ -4,6 +4,7 @@ services:
     build:
       context: .
       dockerfile: ./docker/django/Dockerfile
+    restart: on-failure
     env_file:
       - ./backend/.env
     volumes:
@@ -34,7 +35,7 @@ services:
     ports:
       - "8000:80"
     volumes:
-    # Автоматически в контейнере будут созданы папки static и media
+      # Автоматически в контейнере будут созданы папки static и media
       - static_volume:/var/www/todos/backend/static
       - media_volume:/var/www/todos/backend/media
     depends_on:
@@ -51,7 +52,7 @@ services:
       - todos
 
   celery:
-    build: 
+    build:
       context: .
       dockerfile: ./docker/django/Dockerfile
     restart: on-failure
@@ -67,7 +68,7 @@ services:
       - todos
 
   flower:
-    build: 
+    build:
       context: .
       dockerfile: ./docker/django/Dockerfile
     restart: on-failure
@@ -83,7 +84,7 @@ services:
     ports:
       - "8001:5555"
     networks:
-      - todos    
+      - todos
 
 volumes:
   static_volume:

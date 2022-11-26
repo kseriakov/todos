@@ -1,3 +1,4 @@
+from django import dispatch
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import (
@@ -40,6 +41,8 @@ class UserTodos(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False, verbose_name='Администратор?')
     is_chief = models.BooleanField(default=False, verbose_name='Руководитель?')
 
+    _is_active_chief = models.BooleanField(blank=True, null=True)
+
     objects = UserTodosManager()
 
     USERNAME_FIELD = 'email'
@@ -57,8 +60,36 @@ class UserTodos(AbstractBaseUser, PermissionsMixin):
     def get_short_name(self):
         return self.last_name
 
+    @property
+    def is_active_chief(self):
+        return self._is_active_chief
+
+    @is_active_chief.setter
+    def is_active_chief(self, status: bool):
+        self._is_active_chief = status
+
     def __str__(self):
         return self.get_full_name
 
-    def save(self, **kwargs):
-        return super().save(**kwargs)
+    def __init__(self, *args, **kwargs):
+        if not kwargs.get('is_chief'):
+            return super().__init__(*args, **kwargs)
+
+        if not kwargs.get('is_active'):
+            self.is_active_chief = False
+
+        return super().__init__(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        if (
+            self.is_chief
+            and self.is_active
+            and self.is_active != self.is_active_chief
+        ):
+            self.is_active_chief = self.is_active
+            activate_chief.send(sender=self.__class__, chief=self)
+
+        return super().save(*args, **kwargs)
+
+
+activate_chief = dispatch.Signal()
