@@ -51,7 +51,7 @@ export const Register = () => {
         return () => {
             startRequest = true;
         };
-    }, [isSuccess]);
+    }, [isSuccess, form]);
 
     useEffect(() => {
         if (isError) {
@@ -61,7 +61,7 @@ export const Register = () => {
                 setError(null);
             }, 5000);
         }
-    }, [isError]);
+    }, [isError, form]);
 
     return (
         <div className="content__register register">

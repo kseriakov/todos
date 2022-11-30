@@ -110,37 +110,56 @@ export const refreshTokens = async (): Promise<{
     return {};
 };
 
-export const checkAuthStatus =
+export const updateTokensOnInterval =
     () => async (dispatch: AppDispatch, getState: () => RootState) => {
-        dispatch(authLoading());
-
-        try {
-            const { access: accessToken, refresh: refreshToken } =
-                await refreshTokens();
-
-            if (!accessToken || !refreshToken) {
-                return dispatch(
-                    authError("Error in request does not catch, not tokens")
-                );
-            }
-
-            const profileData = await getMyProfileData(accessToken);
-
-            dispatch(
-                authSuccess({ ...profileData, accessToken, refreshToken })
-            );
-
-            // Реализовать обновление токена!!!
+        const update = setInterval(async () => {
             if (getState().auth.isAuth) {
-                setInterval(() => {}, 1000 * 60 * 5);
-            }
-        } catch (err: AxiosError | any) {
-            dispatch(logout());
-
-            if (err instanceof AxiosError) {
-                dispatch(authError(err?.response?.status as number));
+                const { refresh, access } = await refreshTokens();
+                dispatch(
+                    updateAuthState({
+                        accessToken: access,
+                        refreshToken: refresh,
+                    })
+                );
             } else {
-                dispatch(authError(err.message));
+                clearInterval(update);
+                dispatch(logout());
             }
-        }
+        }, 1000 * 60 * 10);
     };
+
+export const updateAuthState =
+    (data: any) => async (dispatch: AppDispatch, getState: () => RootState) => {
+        dispatch(authSuccess({ ...getState(), ...data }));
+    };
+
+export const checkAuthStatus = () => async (dispatch: AppDispatch) => {
+    dispatch(authLoading());
+
+    try {
+        const { access: accessToken, refresh: refreshToken } =
+            await refreshTokens();
+
+        if (!accessToken || !refreshToken) {
+            return dispatch(
+                authError("Error in request does not catch, not tokens")
+            );
+        }
+
+        const profileData = await getMyProfileData(accessToken);
+
+        dispatch(
+            updateAuthState({ ...profileData, accessToken, refreshToken })
+        );
+
+        dispatch(updateTokensOnInterval());
+    } catch (err: AxiosError | any) {
+        dispatch(logout());
+
+        if (err instanceof AxiosError) {
+            dispatch(authError(err?.response?.status as number));
+        } else {
+            dispatch(authError(err.message));
+        }
+    }
+};

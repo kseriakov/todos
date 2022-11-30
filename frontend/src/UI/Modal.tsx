@@ -9,9 +9,7 @@ export const ModalWindow: React.FC<IModal> = ({ isOpen, setModalOpen }) => {
     const modalRef = useRef<HTMLDivElement>(null);
 
     const handlerClose = (e: React.MouseEvent<HTMLDivElement>) => {
-        e.stopPropagation();
-
-        if (e.target === modalRef.current) {
+        if (!modalRef.current?.contains(e.target as Node)) {
             setModalOpen(false);
         }
     };
@@ -21,10 +19,9 @@ export const ModalWindow: React.FC<IModal> = ({ isOpen, setModalOpen }) => {
             <div
                 className={`content__modal modal${isOpen ? "-show" : ""}`}
                 onClick={handlerClose}
-                ref={modalRef}
             >
                 {isOpen ? (
-                    <div className="modal__body" onClick={handlerClose}>
+                    <div className="modal__body" ref={modalRef}>
                         <h1>
                             Заявка на регистрацию успешно отправлена, ожидайте
                             уведомление о подтверждении на указанный Вами при
